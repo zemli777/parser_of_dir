@@ -1,4 +1,4 @@
-# Парсер репоситориев и архивов 
+# Парсер репоситориев и архивов
 ## Содержание репы
 
 | Файл  | Описание файла |
@@ -9,19 +9,27 @@
 |  | |
 
 
-## Запуск 
+## Запуск
 ```bash
  sudo apt install python3-pip
  sudo apt install python3-venv
- python3 -m venv venv 
+ sudo apt-get install libmariadb3 libmariadb-dev
+
+ python3 -m venv venv
  source venv/bin/activate
  source .env
  pip install -r requirements.txt
  pythom3 main.py
 ```
 
+## Структура проекта
+
+![](./img/sceme.png)
+
+
+
 ## Задачи проекта
-получаем на вход 1 параметр 
+получаем на вход 1 параметр
 
 | путь |
 | ------------- |
@@ -31,7 +39,7 @@
 
 далее проверяется файлы входящие в путь параметра на наличее в бд в таблице tree
 
-![](./img/tree.png) 
+![](./img/tree.png)
 
 
 поля
