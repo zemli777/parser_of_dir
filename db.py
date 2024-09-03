@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 
 import os
 
-
-
 load_dotenv()
 conn = mariadb.connect(
         user = os.getenv("USER"),
@@ -13,8 +11,6 @@ conn = mariadb.connect(
         port = int(os.getenv("PORT")),
         database = os.getenv("DATABASE")
     )
-
-
 
 # SQL-запрос для добавления значения
 sql_query = """
@@ -90,8 +86,38 @@ def add_to_db(data):
     print(f"An error occurred: {e}")
 
 
+def find_in_db_by_path(path):
+  try:
+      global conn
+      cur = conn.cursor()
+      cur.execute(f"SELECT * FROM tree WHERE tree.`path` = '{path}'")
+      data = cur.fetchall()
+      cur.close()
+      return data
+
+  except mariadb.Error as e:
+      print(f"Error find path from MariaDB task: {e}")
+
+def update_db(table, field1, value1, field2, value2): 
+  try:
+      global conn
+      cur = conn.cursor()
+      # Выполнение запроса
+      cur.execute(f"UPDATE {table} SET {table}.`{field2}` =  {value2} WHERE {table}.`{field1}` = '{value1}'")
+      # Коммит изменений
+      conn.commit()
+      print("Value update successfully")
+      cur.close()
+
+  except mariadb.Error as e:
+    # Откат транзакции при ошибке
+    conn.rollback()
+    print(f"An error occurred: {e}")
 
 
+
+#update_db("tree", "path", "/home/sysadm/Documents/parser_of_dir/img/tree.png", "flag_e", 1)
+#find_in_db_by_path("/home/sysadm/Documents/parser_of_dir/img/tree.png")
 # connect_db()
 # #print_table_db("task")
 # test = take_path_db(2)
