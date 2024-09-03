@@ -102,6 +102,7 @@ def type_parser(file_path):
 
 # Пример использования функции
 if __name__ == "__main__":
+    
     connect_db()
     directory_path = take_path_db(2)
     for path in directory_path:

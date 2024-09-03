@@ -1,12 +1,20 @@
 import mariadb
+from dotenv import load_dotenv
 
+import os
+
+
+
+load_dotenv()
 conn = mariadb.connect(
-        user="root",
-        password="12345678",
-        host="localhost",
-        port=3306,
-        database="test"
+        user = os.getenv("USER"),
+        password = os.getenv("PASSWD"),
+        host = os.getenv("HOST"),
+        port = int(os.getenv("PORT")),
+        database = os.getenv("DATABASE")
     )
+
+
 
 # SQL-запрос для добавления значения
 sql_query = """
