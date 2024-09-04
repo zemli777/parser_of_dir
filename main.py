@@ -2,7 +2,7 @@ import os.path
 import pathlib
 import hashlib
 from datetime import datetime
-from db import connect_db, disconnect_db, take_path_db, add_to_db
+from db import connect_db, disconnect_db, take_path_db, add_to_db, update_db, find_in_db_by_path
 
 def print_file_info(file_path):
 
@@ -26,6 +26,26 @@ def print_file_info(file_path):
     return data
 
 
+
+def null_flag_t(path):
+
+    # Проверяем, существует ли директория
+    if not os.path.isdir(path):
+        print(f"Каталог {path} не найден.")
+        return
+
+    """
+    Рекурсивно печатает содержимое каталога.
+    :param path: Путь к каталогу.
+    """
+    for item in os.listdir(path):
+        full_path = os.path.join(path, item)
+        if os.path.isdir(full_path):
+            add_info(full_path)
+        else:
+            update_db("tree", "path", full_path, "flag_t", 0 )
+            
+
 def add_info(path):
 
     # Проверяем, существует ли директория
@@ -42,9 +62,24 @@ def add_info(path):
         if os.path.isdir(full_path):
             add_info(full_path)
         else:
-            #path, size, attr, date_c, date_u, date_l, id_task, flag_t, flag_e
-            data = [full_path, os.path.getsize(full_path), type_parser(full_path)] + print_file_info(full_path) + [0, 1, 0]
-            add_to_db(data)
+            data_db = find_in_db_by_path(full_path)
+            if  data_db:
+                #сверить данные файла без кс 
+                data = [full_path, os.path.getsize(full_path), type_parser(full_path)] + print_file_info(full_path)
+                if ((data_db[0] == data[0]) and (data_db[1]==data[1]) and (data_db[3] == data[3]) and (data_db[4] == data[4])):
+                    update_db("tree", "path", full_path, "flag_t", 1)
+                    update_db("tree", "path", full_path, "date_l", data[5])
+                else:
+                    ks = ks_md5(full_path)
+                    if (data_db[6] != ks):
+                        update_db("tree", "path", full_path, "ks", ks)
+                        update_db("tree", "path", full_path, "flag_e", 0)
+            else: 
+                #path, size, attr, date_c, date_u, date_l, id_task, flag_t, flag_e
+                data = [full_path, os.path.getsize(full_path), type_parser(full_path)] + print_file_info(full_path) 
+                add_to_db(data)
+        update_db("tree", "path", full_path, "flag_t", 1)
+    
 
 
 
@@ -102,14 +137,25 @@ def type_parser(file_path):
 
 # Пример использования функции
 if __name__ == "__main__":
-    
+    task = input("Введите номер задания: ")
+    # Подключаемся к БД
     connect_db()
-    directory_path = take_path_db(2)
+    # Достаем задание 
+    directory_path = take_path_db(task)
+    # Для всех файлов с найденых по заданию устанавливаем в tree flag_t в 0 
     for path in directory_path:
-        #print(path)
+        null_flag_t(path)
+    # Пробежка по файлам
+    for path in directory_path:
+        
+        print(path)
         add_info(path)
         #print_directory_contents(path)
     disconnect_db()
     # file_path = input("Введите путь к файлу: ")
     # type_parser(file_path)
     # print_file_info(file_path)
+
+
+
+
